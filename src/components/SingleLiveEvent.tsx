@@ -1,28 +1,23 @@
-import React, { useState } from "react";
-import { router, useLocalSearchParams, usePathname } from "expo-router";
-import {
-  ArrowLeftIcon,
-  BadgeCheckIcon,
-  CashIcon,
-  ShareIcon,
-  TimeIcon,
-} from "./SvgIcons";
-import { TouchableOpacity } from "react-native-gesture-handler";
 import { Image } from "expo-image";
-import { View } from "./custom/View";
+import { router, useLocalSearchParams, usePathname } from "expo-router";
+import Moment from "moment";
+import React, { useState } from "react";
 import { ActivityIndicator, ScrollView } from "react-native";
+import { TouchableOpacity } from "react-native-gesture-handler";
+import { useSettingsList } from "../features/account";
 import { Badge } from "../features/courses";
-import { Text } from "./custom/Text";
+import { InformationCard } from "../features/liveEvent";
+import useLiveEventPayment from "../features/liveEvent/hooks/useLiveEventPayment";
+import useSingleLiveEvent from "../features/liveEvent/hooks/useSingleLiveEvent";
+import useAuth from "../hooks/useAuth";
 import { API } from "../lib/client";
 import { authRoutes } from "../routes";
-import Moment from "moment";
-import ShareButton from "./ShareButton";
-import { useSettingsList } from "../features/account";
-import useSingleLiveEvent from "../features/liveEvent/hooks/useSingleLiveEvent";
-import useLiveEventPayment from "../features/liveEvent/hooks/useLiveEventPayment";
-import { InformationCard } from "../features/liveEvent";
-import useAuth from "../hooks/useAuth";
+import { Text } from "./custom/Text";
+import { View } from "./custom/View";
+import NoSeatLeftDialog from "./NoSeatLeftDialog";
 import PurchaseAgreementModal from "./PurchaseAgreementModal";
+import ShareButton from "./ShareButton";
+import { ArrowLeftIcon, BadgeCheckIcon, CashIcon, TimeIcon } from "./SvgIcons";
 
 const SingleLiveEvent = () => {
   const { id } = useLocalSearchParams();
@@ -32,7 +27,23 @@ const SingleLiveEvent = () => {
     Moment(Date.now()).isSameOrAfter(data.event_at)
   );
   const { session } = useAuth();
-  const { mutate: paymentHandler, isPending } = useLiveEventPayment(Number(id));
+
+  const [showNoSeatLeftDialog, setShowNoSeatLeftDialog] =
+    useState<boolean>(false);
+
+  const handelPaymentError = (error: any) => {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+
+    if (errorMessage.includes("المقاعد مكتملة")) {
+      setShowNoSeatLeftDialog(true);
+    }
+  };
+
+  const { mutate: paymentHandler, isPending } = useLiveEventPayment(
+    Number(id),
+    data.event_type || "null",
+    handelPaymentError
+  );
 
   const [showAgreementModal, setShowAgreementModal] = useState<boolean>(false);
 
@@ -81,6 +92,7 @@ const SingleLiveEvent = () => {
           params: {
             navigateTo: `/live-event/${id}`,
             paymentType: "freeLiveEvent",
+            eventType: data.event_type || "null",
           },
         });
       }
@@ -186,6 +198,13 @@ const SingleLiveEvent = () => {
         close={() => setShowAgreementModal(false)}
         navigateToPurchase={handleAgreementAcceptance}
       />
+
+      {showNoSeatLeftDialog && (
+        <NoSeatLeftDialog
+          opened={true}
+          changeOpenedState={setShowNoSeatLeftDialog}
+        />
+      )}
     </>
   );
 };

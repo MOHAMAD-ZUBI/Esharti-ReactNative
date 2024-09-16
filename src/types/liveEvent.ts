@@ -14,4 +14,5 @@ export type liveEventProps = {
   image: null | string;
   meeting_info: meetingProps | null;
   purchased: boolean;
+  event_type: "advanced" | "essentials" | null;
 };

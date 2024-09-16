@@ -1,14 +1,16 @@
 import { AntDesign } from "@expo/vector-icons";
+import LottieView from "lottie-react-native";
 import Container from "../components/Container";
 import { Text } from "../components/custom/Text";
 import { View } from "../components/custom/View";
-import LottieView from "lottie-react-native";
 
-import { Platform, TouchableOpacity } from "react-native";
-import { useEffect, useRef } from "react";
 import { router, useLocalSearchParams } from "expo-router";
+import { useEffect, useRef, useState } from "react";
+import { Platform, TouchableOpacity } from "react-native";
+import ContactStepDialog from "../components/ContactStepDialog";
+import { useSettingsList } from "../features/account";
 
-type searchParamsProps = {
+export type SearchParamsProps = {
   navigateTo: string;
   paymentType:
     | "course"
@@ -17,25 +19,32 @@ type searchParamsProps = {
     | "Dictionaries"
     | "freeDictionaries"
     | "freeLiveEvent";
+  eventType: "essential" | "advanced" | "null";
+  liveEventId: string;
 };
 
 export default function paymentSuccess() {
   const animation = useRef(null);
-  const { navigateTo, paymentType } = useLocalSearchParams<searchParamsProps>();
+  const { paymentType, eventType } = useLocalSearchParams<SearchParamsProps>();
+
+  const showDialogPaymentTypes = ["liveEvent", "freeLiveEvent"];
+
+  const showDialog =
+    showDialogPaymentTypes.includes(paymentType) && eventType !== "null";
+
+  const [showContactDialog, setShowContactDialog] =
+    useState<boolean>(showDialog);
+
+  const { data: settings } = useSettingsList();
 
   useEffect(() => {
     //@ts-ignore
     Platform.OS === "ios" && animation.current?.play();
   }, []);
 
-  useEffect(() => {
-    let timeOut: any;
-    timeOut = setTimeout(() => {
-      //@ts-ignore
-      router.replace(`${navigateTo}`);
-    }, 5000);
-    return () => clearTimeout(timeOut);
-  }, []);
+  const message = settings?.find(
+    (item) => item.key === eventType + "_respon"
+  )?.value;
 
   return (
     <Container
@@ -81,6 +90,14 @@ export default function paymentSuccess() {
         >
           <Text className="text-white text-md">متابعة</Text>
         </TouchableOpacity>
+
+        {showContactDialog && (
+          <ContactStepDialog
+            opened={showContactDialog}
+            changeOpenedState={setShowContactDialog}
+            message={message || ""}
+          />
+        )}
       </View>
     </Container>
   );

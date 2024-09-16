@@ -1,12 +1,13 @@
 import { router, useLocalSearchParams } from "expo-router";
-import Container from "../components/Container";
-import { WebView } from "react-native-webview";
 import { useEffect, useState } from "react";
+import { WebView } from "react-native-webview";
+import Container from "../components/Container";
 export default function Payment() {
-  const { paymentUri, navigatedFrom, id } = useLocalSearchParams<{
+  const { paymentUri, navigatedFrom, id, eventType } = useLocalSearchParams<{
     paymentUri: string;
     navigatedFrom: string;
     id: string;
+    eventType: string;
   }>();
   const [uri, setUri] = useState("");
   useEffect(() => {
@@ -34,6 +35,7 @@ export default function Payment() {
             params: {
               navigateTo: `/live-event/${id}`,
               paymentType: "liveEvent",
+              eventType: eventType,
             },
           });
         } else {
