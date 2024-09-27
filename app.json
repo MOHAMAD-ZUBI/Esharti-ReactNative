@@ -37,7 +37,7 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.oxygen.esharty",
-      "versionCode": 5,
+      "versionCode": 7,
       "runtimeVersion": "1.7.0",
       "intentFilters": [
         {
