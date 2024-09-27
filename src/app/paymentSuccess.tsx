@@ -19,13 +19,14 @@ export type SearchParamsProps = {
     | "Dictionaries"
     | "freeDictionaries"
     | "freeLiveEvent";
-  eventType: "essential" | "advanced" | "null";
+  eventType: "essentials" | "advanced" | "null";
   liveEventId: string;
 };
 
 export default function paymentSuccess() {
   const animation = useRef(null);
   const { paymentType, eventType } = useLocalSearchParams<SearchParamsProps>();
+
 
   const showDialogPaymentTypes = ["liveEvent", "freeLiveEvent"];
 
