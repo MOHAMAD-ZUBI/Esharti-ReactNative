@@ -84,9 +84,9 @@ const SingleLiveEvent = () => {
     if (data?.is_paid === false && data?.purchased === false) {
       setIsLoading(true);
       try {
-        await API.post(authRoutes.buyLiveEvent, { liveEvent_id: data?.id });
-      } finally {
-        setIsLoading(false);
+        await API.post(authRoutes.buyLiveEvent, {
+          liveEvent_id: data?.id,
+        });
         router.replace({
           pathname: "/paymentSuccess",
           params: {
@@ -95,6 +95,19 @@ const SingleLiveEvent = () => {
             eventType: data.event_type || "null",
           },
         });
+      } catch (error: any) {
+        if (error.response) {
+          const responseData = error.response.data;
+          if (
+            responseData.errors.includes(
+              "لا تستطيع الحجز الآن لأن جميع المقاعد مكتملة"
+            )
+          ) {
+            setShowNoSeatLeftDialog(true);
+          }
+        }
+      } finally {
+        setIsLoading(false);
       }
     }
   };
